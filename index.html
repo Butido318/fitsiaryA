@@ -236,11 +236,12 @@
 <div class="wrap">
   <header>
     <div class="eyebrow">今天吃了什麼？</div>
-    <h1 id="pageTitle">飲食與塑身紀錄</h1>
+    <h1 id="pageTitle">飲食與運動紀錄</h1>
     <div class="date-row">
       <input type="date" id="dateInput">
       <button class="today-btn" id="todayBtn" onclick="setToToday()">回到今天</button>
     </div>
+    <div class="date" id="dateSummary" style="margin-top:6px;"></div>
   </header>
 
   <div class="tabbar">
@@ -254,15 +255,15 @@
     <div id="favArea"></div>
 
     <div class="settings-card">
-      <div class="fav-label" style="margin-bottom:8px;">新增食物（食物名稱＋估計份量或重量）</div>
+      <div class="fav-label" style="margin-bottom:8px;">新增（食物名稱＋估計份量）</div>
       <div id="foodRows"></div>
       <button class="cancel-btn" onclick="addFoodRow()">＋ 新增一列</button>
       <button class="add-btn" onclick="estimateFoodRows()">AI 估算營養</button>
-      <div class="note">＊ 填「食物名稱」與「份量或重量」（例如：150g、1碗、半份），AI 會依你填的量估算熱量與營養，不需要拍照。</div>
+      <div class="note">＊ 填「食物名稱」與「份量」（例如：150g、1碗、半份），AI 會依你填的量估算熱量與營養，不需要拍照。</div>
     </div>
 
     <div id="loadingBox" class="loading" style="display:none;">
-      <div class="spinner"></div><span>正在估算營養中…</span>
+      <div class="spinner"></div><span>正在估算中…</span>
     </div>
     <div id="errorBox" class="error-box" style="display:none;"></div>
     <div id="resultCard"></div>
@@ -307,7 +308,7 @@
       </div>
     </div>
 
-    <div class="section-title" id="calorieSummaryTitle">今日熱量收支</div>
+    <div class="section-title" id="calorieSummaryTitle">今日熱量盈餘</div>
     <div class="settings-card" id="calorieSummary"></div>
 
     <div class="section-title">運動紀錄</div>
@@ -316,16 +317,12 @@
         <div class="field">
           <label>運動類型</label>
           <select id="ex-type">
-            <option value="橢圓機" data-met="5.0">橢圓機</option>
-            <option value="拳擊" data-met="7.8">拳擊</option>
-            <option value="BODY COMBAT" data-met="8.5">BODY COMBAT</option>
-            <option value="BODY PUMP" data-met="6.0">BODY PUMP</option>
-            <option value="重訓（臀腿）" data-met="6.0">重訓（臀腿）</option>
-            <option value="重訓（肩背手）" data-met="5.0">重訓（肩背手）</option>
+            
+          <option value="走路（30分）" data-met="2.8">走路（30分）</option>
           </select>
         </div>
         <div class="field"><label>時間 (分鐘)</label><input type="number" id="ex-duration" placeholder="30"></div>
-        <div class="field"><label>體重 (kg)</label><input type="number" id="ex-weight" step="0.1" placeholder="從塑身紀錄帶入"></div>
+        <div class="field"><label>體重 (kg)</label><input type="number" id="ex-weight" step="0.1" placeholder="inbody紀錄"></div>
       </div>
       <button class="add-btn" onclick="estimateExercise()">估算消耗熱量</button>
       <div class="note">＊ 以 MET 公式估算：消耗大卡 = MET × 體重(kg) × 時間(小時)，估算後可再手動調整，實際消耗因人而異，僅供參考。</div>
@@ -345,13 +342,15 @@
     <div id="exerciseList" style="margin-top:10px;"></div>
 
     <div class="section-title">本週熱量趨勢</div>
-    <div class="chart-box" id="weeklyChart"></div>
+    <div class="chart-box" id="weeklyChart">
+      <button class="cancel-btn" style="margin-top:0;" onclick="renderWeeklyChart()">點擊載入本週熱量趨勢</button>
+    </div>
   </div>
 
   <!-- BODY TAB -->
   <div class="tab-panel" id="tab-body">
     <div class="settings-card">
-      <div class="fav-label" id="bodyLatest" style="margin-bottom:8px;text-transform:none;letter-spacing:0;">還沒有任何紀錄</div>
+      <div class="fav-label" id="bodyLatest" style="margin-bottom:8px;text-transform:none;letter-spacing:0;">無任何紀錄</div>
       <div class="field-grid">
         <div class="field"><label>體重 (kg)</label><input type="number" id="bf-weight" step="0.1" placeholder="選填"></div>
         <div class="field"><label>體脂率 (%)</label><input type="number" id="bf-bodyfat" step="0.1" placeholder="選填"></div>
@@ -359,7 +358,7 @@
       </div>
       <div class="note-field"><label>備註（聚餐／生理期／訓練日…）</label><input type="text" id="bf-note" placeholder="選填"></div>
       <button class="add-btn" id="addBodyBtn" onclick="addBodyEntry()">加入今日紀錄</button>
-      <div class="note">＊ 沒有新量測數據就不用填，空著的欄位會自動沿用最近一次的數值。</div>
+      <div class="note">＊ 沒有新量測數據就不用填，會自動沿用最近一次的數值。</div>
     </div>
 
     <div class="section-title">時間軸</div>
@@ -380,21 +379,21 @@
 
   <!-- SETTINGS TAB -->
   <div class="tab-panel" id="tab-settings">
-    <div class="section-title" style="margin-top:0;">每日目標設定</div>
+    <div class="section-title" style="margin-top:0;">目標設定</div>
     <div class="settings-card">
       <div class="settings-row"><label>基礎代謝率 BMR (大卡)</label><input type="number" id="t-bmr"></div>
-      <div class="settings-row"><label>熱量目標 (大卡)</label><input type="number" id="t-cal"></div>
-      <div class="settings-row"><label>蛋白質目標 (g)</label><input type="number" id="t-protein"></div>
-      <div class="settings-row"><label>碳水目標 (g)</label><input type="number" id="t-carbs"></div>
-      <div class="settings-row"><label>脂肪目標 (g)</label><input type="number" id="t-fat"></div>
+      <div class="settings-row"><label>熱量 (大卡)</label><input type="number" id="t-cal"></div>
+      <div class="settings-row"><label>蛋白質 (g)</label><input type="number" id="t-protein"></div>
+      <div class="settings-row"><label>碳水 (g)</label><input type="number" id="t-carbs"></div>
+      <div class="settings-row"><label>脂肪 (g)</label><input type="number" id="t-fat"></div>
       <button class="save-btn" onclick="saveTargets()">儲存目標</button>
       <div class="saved-toast" id="targetToast"></div>
     </div>
 
     <div class="section-title">匯出資料</div>
     <div class="settings-card">
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;">匯出所有紀錄（含體重／體脂數字，不含照片檔案）為 Excel 檔。</div>
-      <button class="export-btn" onclick="exportExcel()">匯出成 Excel</button>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;">匯出Excel紀錄（含體重／體脂數字，不含照片檔案）</div>
+      <button class="export-btn" onclick="exportExcel()">匯出資料</button>
     </div>
   </div>
 </div>
@@ -403,16 +402,22 @@
 /* ---------- Apps Script 後端網址 ----------
    部署好 apps_script.gs 之後，把下面這行換成你的 Web App 網址
    （長得像 https://script.google.com/macros/s/xxxx/exec） */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuTWWMzX4DhDYQ2SiYOqOZ-ZCTM9Sx-_NpHpLwG4Mn7pOgQ9-3mnB690DRCNGhAYw9Lw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwn_JGRmJUFiqqe33xSYy_9NmcPTRKKeWNDjP39YwYuh4nusmQoDdLZES5eceUt5kdOjg/exec";
 
 /* ---------- storage adapter（透過 Apps Script 讀寫 Google 試算表） ---------- */
 const storage = {
-  async get(key){
+  async get(key, _retried){
     try{
       const res = await fetch(`${APPS_SCRIPT_URL}?action=get&key=${encodeURIComponent(key)}`);
       const data = await res.json();
       return (data && data.value!=null) ? {key, value:data.value} : null;
-    }catch(e){ console.error('storage.get failed', e); return null; }
+    }catch(e){
+      if(!_retried){
+        await new Promise(r=>setTimeout(r,400));
+        return storage.get(key, true);
+      }
+      console.error('storage.get failed', e); return null;
+    }
   },
   async set(key, value){
     const res = await fetch(APPS_SCRIPT_URL, {
@@ -470,10 +475,10 @@ function refreshDateUI(){
   document.getElementById('dateInput').value = currentDate;
   const isToday = currentDate===todayKey();
   const dayLabel = isToday ? '今日' : shortDateLabel(currentDate);
-  document.getElementById('pageTitle').textContent = isToday ? '飲食塑身紀錄' : formatDateLabel(currentDate)+' 飲食紀錄';
+  document.getElementById('pageTitle').textContent = isToday ? '飲食運動紀錄' : formatDateLabel(currentDate)+' 紀錄';
   document.getElementById('todayBtn').classList.toggle('is-today', isToday);
   document.getElementById('logTitle').textContent = `${dayLabel}紀錄`;
-  document.getElementById('calorieSummaryTitle').textContent = `${dayLabel}熱量收支`;
+  document.getElementById('calorieSummaryTitle').textContent = `${dayLabel}熱量盈餘`;
   document.getElementById('addBodyBtn').textContent = `加入${dayLabel}紀錄`;
 }
 function setToToday(){
@@ -499,11 +504,11 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 });
 
 /* ---------- targets ---------- */
-let targets = {calories:2000,protein:100,carbs:250,fat:65,bmr:1300};
+let targets = {calories:2000,protein:200,carbs:240,fat:100,bmr:2100};
 async function loadTargets(){
   try{
     const r = await storage.get('targets');
-    if(r) targets = Object.assign({bmr:1300}, JSON.parse(r.value));
+    if(r) targets = Object.assign({bmr:2100}, JSON.parse(r.value));
   }catch(e){}
   document.getElementById('t-bmr').value = targets.bmr;
   document.getElementById('t-cal').value = targets.calories;
@@ -554,6 +559,10 @@ async function deleteFavorite(id){
   renderFavorites();
 }
 async function quickAddFav(id){
+  if(document.getElementById('resultCard').innerHTML.trim()){
+    alert('目前還有一份 AI 估算結果尚未確認加入，請先按「加入今日紀錄」或「取消」，再新增常用食物，避免弄丟剛剛估算的內容。');
+    return;
+  }
   const favs = await getFavorites();
   const f = favs.find(x=>x.id===id);
   if(!f) return;
@@ -679,7 +688,7 @@ function renderResultCard(result){
       <div class="items-total"><span>合計</span><span>${fmtNum(total.calories)} 大卡</span></div>
       ${result.note?`<div class="note">＊ ${escapeHtml(result.note)}</div>`:''}
       <div class="note">＊ AI 依你填寫的份量估算，僅供參考，皆可手動修改。</div>
-      <label class="fav-check"><input type="checkbox" id="f-savefav"> 加入常用食物清單（整份餐點）</label>
+      <label class="fav-check"><input type="checkbox" id="f-savefav"> 加入常用食物清單（整批）</label>
       <button class="add-btn" onclick="addToLog(${items.length})">加入今日紀錄</button>
       <button class="cancel-btn" onclick="clearResult()">取消</button>
     </div>`;
@@ -763,13 +772,12 @@ async function estimateExercise(){
   const met = Number(sel.selectedOptions[0].dataset.met);
   const duration = Number(document.getElementById('ex-duration').value)||0;
   let weight = Number(document.getElementById('ex-weight').value)||0;
-  if(!weight){
-    const bodyEntries = await getBodyEntries();
-    const withWeight = bodyEntries.filter(e=>e.weight!=null);
-    if(withWeight.length>0) weight = withWeight[withWeight.length-1].weight;
+  if(!weight && window.__latestBodyWeight!=null){
+    weight = window.__latestBodyWeight;
+    document.getElementById('ex-weight').value = weight;
   }
   if(!duration || !weight){
-    alert('請輸入運動時間，並確認體重（可先到「inbody」分頁記錄一次體重）');
+    alert('請輸入運動時間，並確認體重（請至「inbody」分頁記錄）');
     return;
   }
   const calories = Math.round(met * weight * (duration/60));
@@ -819,6 +827,10 @@ async function deleteExerciseFavorite(id){
   renderExerciseFavorites();
 }
 async function quickAddExerciseFav(id){
+  if(document.getElementById('exercisePreview').innerHTML.trim()){
+    alert('目前還有一份運動估算結果尚未確認加入，請先按「加入運動紀錄」或「取消」，再新增常用運動。');
+    return;
+  }
   const favs = await getExerciseFavorites();
   const f = favs.find(x=>x.id===id);
   if(!f) return;
@@ -862,6 +874,7 @@ async function deleteExercise(id){
 }
 async function renderExerciseList(){
   const entries = await getExerciseEntries();
+  window.__lastExerciseCount = entries.length;
   const el = document.getElementById('exerciseList');
   el.innerHTML = entries.length===0 ? '' : entries.map(e=>{
     const subParts = [];
@@ -904,6 +917,13 @@ async function renderDietLog(){
       </div>`;
   listEl.innerHTML = entries.length===0 ? '<div class="empty">今天還沒有紀錄，往上新增食物開始吧！</div>' : itemsHtml + totalRowHtml;
   const burned = await renderExerciseList();
+  const exerciseCount = window.__lastExerciseCount || 0;
+  const dsEl = document.getElementById('dateSummary');
+  if(entries.length===0 && exerciseCount===0){
+    dsEl.textContent = '這天還沒有任何紀錄';
+  }else{
+    dsEl.textContent = `${entries.length} 筆飲食紀錄・${exerciseCount} 筆運動紀錄（合計 ${fmtNum(t.calories)} 大卡）`;
+  }
   document.getElementById('sumCal').textContent = `${fmtNum(t.calories)} / ${fmtNum(targets.calories)}`;
   document.getElementById('sumProtein').textContent = `${fmtNum(t.protein)}/${fmtNum(targets.protein)}g`;
   document.getElementById('sumCarbs').textContent = `${fmtNum(t.carbs)}/${fmtNum(targets.carbs)}g`;
@@ -920,46 +940,48 @@ async function renderDietLog(){
     <div class="calorie-row"><span>基礎代謝 (BMR)</span><span class="cr-val">${fmtNum(targets.bmr)} 大卡</span></div>
     <div class="calorie-row"><span>運動消耗</span><span class="cr-val">${fmtNum(burned)} 大卡</span></div>
     <div class="calorie-row"><span>總消耗（BMR＋運動）</span><span class="cr-val">${fmtNum(totalBurn)} 大卡</span></div>
-    <div class="calorie-row deficit"><span>熱量赤字</span><span class="cr-val ${deficit<=0?'pos':'neg'}">${deficit>0?'+':''}${fmtNum(deficit)} 大卡${deficit<=0?'（赤字）':'（盈餘）'}</span></div>`;
-
-  renderWeeklyChart();
+    <div class="calorie-row deficit"><span>熱量赤字</span><span class="cr-val ${deficit<=0?'pos':'neg'}">${deficit>0?'+':''}${fmtNum(deficit)} 大卡${deficit<=0?'（赤字）':'（超量）'}</span></div>`;
 }
 
 async function renderWeeklyChart(){
   const box = document.getElementById('weeklyChart');
   if(!box) return;
+  box.innerHTML = '<div class="empty">載入中…</div>';
   const days = [];
   for(let i=6;i>=0;i--){
     const d = new Date();
     d.setDate(d.getDate()-i);
     days.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
   }
-  const data = [];
-  for(const date of days){
+  // 一次平行送出所有請求，不要一個一個排隊等，會快很多
+  const fetches = days.map(date => Promise.all([
+    storage.get(`entries:${date}`).catch(()=>null),
+    storage.get(`exercise:${date}`).catch(()=>null)
+  ]));
+  const results = await Promise.all(fetches);
+  const data = days.map((date, i) => {
+    const [entryRes, exRes] = results[i];
     let intake = 0, burn = 0;
-    try{
-      const r = await storage.get(`entries:${date}`);
-      if(r) intake = JSON.parse(r.value).reduce((a,e)=>a+e.calories,0);
-    }catch(e){}
-    try{
-      const r = await storage.get(`exercise:${date}`);
-      if(r) burn = JSON.parse(r.value).reduce((a,e)=>a+e.calories,0);
-    }catch(e){}
+    try{ if(entryRes) intake = JSON.parse(entryRes.value).reduce((a,e)=>a+e.calories,0); }catch(e){}
+    try{ if(exRes) burn = JSON.parse(exRes.value).reduce((a,e)=>a+e.calories,0); }catch(e){}
     const totalBurn = targets.bmr + burn;
-    data.push({date, intake, burn: totalBurn, deficit: intake - totalBurn});
-  }
-  const w=300,h=150,pad=28;
+    return {date, intake, burn: totalBurn, deficit: intake - totalBurn};
+  });
+  const w=300,h=175,pad=30;
   const allVals = data.flatMap(d=>[d.intake,d.burn,d.deficit]);
   const min = Math.min(0,...allVals), max = Math.max(...allVals,1);
   const range = (max-min)||1;
   const stepX = (w-pad*2)/(data.length-1);
+  function yOf(v){ return pad + (1-(v-min)/range)*(h-pad*2-14); }
   function lineFor(key,color){
-    const coords = data.map((d,i)=>[pad+i*stepX, pad + (1-(d[key]-min)/range)*(h-pad*2)]);
+    const coords = data.map((d,i)=>[pad+i*stepX, yOf(d[key])]);
     const path = coords.map((c,i)=>(i===0?'M':'L')+c[0].toFixed(1)+','+c[1].toFixed(1)).join(' ');
     const dots = coords.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="2.5" fill="${color}"/>`).join('');
-    return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2"/>${dots}`;
+    const valLabels = data.map((d,i)=>`<text x="${coords[i][0]}" y="${coords[i][1]-5}" font-size="6.5" font-weight="700" fill="${color}" text-anchor="middle">${fmtNum(d[key])}</text>`).join('');
+    return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2"/>${dots}${valLabels}`;
   }
-  const zeroY = pad + (1-(0-min)/range)*(h-pad*2);
+  const zeroY = yOf(0);
+  const maxY = yOf(max), minY = yOf(min);
   const labels = data.map((d,i)=>`<text x="${pad+i*stepX}" y="${h-4}" font-size="7" fill="#6b6b63" text-anchor="middle">${d.date.slice(8)}</text>`).join('');
   box.innerHTML = `
     <div class="chart-legend">
@@ -973,6 +995,7 @@ async function renderWeeklyChart(){
       ${lineFor('burn','#3d5a80')}
       ${lineFor('deficit','#2f6f4e')}
       ${labels}
+      <text x="2" y="${zeroY+3}" font-size="8" fill="#6b6b63">0</text>
     </svg>`;
 }
 async function getBodyEntries(){
@@ -1024,16 +1047,23 @@ async function renderBodyTab(){
   const entries = await getBodyEntries();
   const latest = entries.length ? entries[entries.length-1] : null;
   const latestBox = document.getElementById('bodyLatest');
+  // 找最近一筆有體重的紀錄，直接帶進運動分頁的體重欄位，不用每次估算運動時額外查一次
+  const latestWithWeight = entries.slice().reverse().find(e=>e.weight!=null);
+  window.__latestBodyWeight = latestWithWeight ? latestWithWeight.weight : null;
+  const exWeightInput = document.getElementById('ex-weight');
+  if(exWeightInput && !exWeightInput.value && window.__latestBodyWeight!=null){
+    exWeightInput.value = window.__latestBodyWeight;
+  }
   if(latest){
     latestBox.innerHTML = `最新記錄（${latest.date}）：${latest.weight!=null?fmtNum(latest.weight)+'kg・':''}${latest.bodyFat!=null?fmtNum(latest.bodyFat)+'%・':''}${latest.muscleMass!=null?fmtNum(latest.muscleMass)+'kg':''}`;
     document.getElementById('bf-weight').placeholder = latest.weight!=null ? `目前 ${fmtNum(latest.weight)}` : '選填';
     document.getElementById('bf-bodyfat').placeholder = latest.bodyFat!=null ? `目前 ${fmtNum(latest.bodyFat)}` : '選填';
     document.getElementById('bf-muscle').placeholder = latest.muscleMass!=null ? `目前 ${fmtNum(latest.muscleMass)}` : '選填';
   }else{
-    latestBox.innerHTML = '還沒有任何紀錄';
+    latestBox.innerHTML = '無任何紀錄';
   }
   const tl = document.getElementById('bodyTimeline');
-  tl.innerHTML = entries.length===0 ? '<div class="empty">還沒有紀錄</div>' :
+  tl.innerHTML = entries.length===0 ? '<div class="empty">無任何紀錄</div>' :
     entries.slice().reverse().map(e=>`
       <div class="log-item">
         <div class="li-left">
@@ -1052,40 +1082,43 @@ async function renderBodyTab(){
   renderCompare();
 }
 
-function buildLine(pts, key, w, h, pad, min, max){
-  const range = (max-min)||1;
+function buildIndependentLine(pts, key, w, h, pad, color){
   const valid = pts.map((p,i)=>({i,v:p[key]})).filter(x=>x.v!=null);
-  if(valid.length<2) return null;
+  if(valid.length<2) return '';
+  const vmin = Math.min(...valid.map(x=>x.v)), vmax = Math.max(...valid.map(x=>x.v));
+  const range = (vmax-vmin)||1;
   const stepX = (w-pad*2)/(pts.length-1 || 1);
-  const coords = valid.map(x=>[pad + x.i*stepX, pad + (1-(x.v-min)/range)*(h-pad*2)]);
+  const coords = valid.map(x=>[pad + x.i*stepX, pad + (1-(x.v-vmin)/range)*(h-pad*2-10)]);
   const path = coords.map((c,i)=>(i===0?'M':'L')+c[0].toFixed(1)+','+c[1].toFixed(1)).join(' ');
-  const dots = coords.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="3" fill="currentColor"/>`).join('');
-  return {path, dots, first:valid[0].v, last:valid[valid.length-1].v};
+  const dots = coords.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="3" fill="${color}"/>`).join('');
+  const pointLabels = coords.map((c,i)=>{
+    const anchor = i===0 ? 'start' : (i===coords.length-1 ? 'end' : 'middle');
+    return `<text x="${c[0]}" y="${c[1]-7}" font-size="8" font-weight="700" fill="${color}" text-anchor="${anchor}">${fmtNum(valid[i].v)}</text>`;
+  }).join('');
+  return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2"/>${dots}${pointLabels}`;
 }
 
 function renderWeightChart(pts){
   const box = document.getElementById('weightChart');
   const hasWeight = pts.filter(p=>p.weight!=null).length>=2;
   const hasMuscle = pts.filter(p=>p.muscleMass!=null).length>=2;
-  if(!hasWeight && !hasMuscle){ box.innerHTML = '<div class="empty">至少需要 2 筆含體重或肌肉量的紀錄才能繪製趨勢圖</div>'; return; }
-  const w=300,h=130,pad=26;
-  const allVals = pts.flatMap(p=>[p.weight,p.muscleMass]).filter(v=>v!=null);
-  const min=Math.min(...allVals), max=Math.max(...allVals);
-  const weightLine = hasWeight ? buildLine(pts,'weight',w,h,pad,min,max) : null;
-  const muscleLine = hasMuscle ? buildLine(pts,'muscleMass',w,h,pad,min,max) : null;
+  if(!hasWeight && !hasMuscle){ box.innerHTML = '<div class="empty">至少需要 2 筆紀錄才有趨勢圖</div>'; return; }
+  const w=300,h=150,pad=30;
   const firstDate = pts[0].date.slice(5), lastDate = pts[pts.length-1].date.slice(5);
+  // 體重跟肌肉量單位差太多，各自用自己的最高最低值畫線，不共用同一個Y軸座標，
+  // 不然肌肉量的變化會被體重的大範圍壓成一條幾乎看不出坡度的平線。
+  const weightSvg = hasWeight ? buildIndependentLine(pts,'weight',w,h,pad,'#e8590c') : '';
+  const muscleSvg = hasMuscle ? buildIndependentLine(pts,'muscleMass',w,h,pad,'#2f6f4e') : '';
   box.innerHTML = `
     <div class="chart-legend">
-      ${weightLine?'<span><i class="dotline" style="background:#e8590c"></i>體重</span>':''}
-      ${muscleLine?'<span><i class="dotline" style="background:#2f6f4e"></i>肌肉量</span>':''}
+      ${hasWeight?'<span><i class="dotline" style="background:#e8590c"></i>體重</span>':''}
+      ${hasMuscle?'<span><i class="dotline" style="background:#2f6f4e"></i>肌肉量</span>':''}
     </div>
     <svg viewBox="0 0 ${w} ${h}" style="width:100%;">
-      ${weightLine?`<g style="color:#e8590c"><path d="${weightLine.path}" fill="none" stroke="currentColor" stroke-width="2"/>${weightLine.dots}</g>`:''}
-      ${muscleLine?`<g style="color:#2f6f4e"><path d="${muscleLine.path}" fill="none" stroke="currentColor" stroke-width="2"/>${muscleLine.dots}</g>`:''}
+      ${weightSvg}
+      ${muscleSvg}
       <text x="${pad}" y="${h-6}" font-size="8" fill="#6b6b63">${firstDate}</text>
       <text x="${w-pad}" y="${h-6}" font-size="8" fill="#6b6b63" text-anchor="end">${lastDate}</text>
-      <text x="${pad}" y="14" font-size="10" font-weight="700" fill="#1a1a1a">${max.toFixed(1)}</text>
-      <text x="${pad}" y="${h-pad+10}" font-size="10" font-weight="700" fill="#1a1a1a">${min.toFixed(1)}</text>
     </svg>`;
 }
 
@@ -1151,17 +1184,19 @@ async function exportExcel(){
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(dietRows.length?dietRows:[{提示:'尚無飲食紀錄'}]), '飲食紀錄');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(exerciseRows.length?exerciseRows:[{提示:'尚無運動紀錄'}]), '運動紀錄');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(bodyRows.length?bodyRows:[{提示:'尚無inbody紀錄'}]), 'inbody紀錄');
-  XLSX.writeFile(wb, `飲食塑形紀錄_${todayKey()}.xlsx`);
+  XLSX.writeFile(wb, `飲食運動紀錄_${todayKey()}.xlsx`);
 }
 
 /* ---------- init ---------- */
 (async function init(){
   ensureFoodRows();
   await loadTargets();
-  await renderFavorites();
-  await renderExerciseFavorites();
+  await Promise.all([
+    renderFavorites(),
+    renderExerciseFavorites(),
+    renderBodyTab()
+  ]);
   await renderDietLog();
-  await renderBodyTab();
 })();
 
 </script>
